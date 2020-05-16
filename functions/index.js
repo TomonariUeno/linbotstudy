@@ -1,59 +1,13 @@
 const functions = require('firebase-functions'); //import
 const line = require('@line/bot-sdk');
 const admin = require('firebase-admin');
-const googleMapsClient = require('@google/maps').createClient({
-    key: 'AIzaSyCuogkz4u-6QSmOLdTBJoMy9gTPPQZnkiM',
-    Promise: Promise
-  });
-
-admin.initializeApp();//初期化
+admin.initializeApp();
 const firestore = admin.firestore();
 
-googleMapsClient.geocode({address: '1600 Amphitheatre Parkway, Mountain View, CA'})
-    .asPromise()
-    .then((response) => {
-        console.log(response.json.results);
-    })
-    .catch((err) => {
-    console.log(err);
-});
 
-var map, infoWindow;
-function initMap() {
-  map = new google.maps.Map(document.getElementById('map'), {
-    center: {lat: -34.397, lng: 150.644},
-    zoom: 6
-  });
-  infoWindow = new google.maps.InfoWindow;
 
-  // Try HTML5 geolocation.
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(function(position) {
-      var pos = {
-        lat: position.coords.latitude,
-        lng: position.coords.longitude
-      };
 
-      infoWindow.setPosition(pos);
-      infoWindow.setContent('Location found.');
-      infoWindow.open(map);
-      map.setCenter(pos);
-    }, function() {
-      handleLocationError(true, infoWindow, map.getCenter());
-    });
-  } else {
-    // Browser doesn't support Geolocation
-    handleLocationError(false, infoWindow, map.getCenter());
-  }
-}
 
-function handleLocationError(browserHasGeolocation, infoWindow, pos) {
-  infoWindow.setPosition(pos);
-  infoWindow.setContent(browserHasGeolocation ?
-                        'Error: The Geolocation service failed.' :
-                        'Error: Your browser doesn\'t support geolocation.');
-  infoWindow.open(map);
-}
 
 // // Create and Deploy Your First Cloud Functions
 // // https://firebase.google.com/docs/functions/write-firebase-functions
@@ -73,6 +27,13 @@ exports.line = functions.https.onRequest(async(request, response) => {
 
     console.log("body",body)
     console.log("events",events)
+
+    let messages = []
+    const querSnapShot = await firestore.collection("messages").get();
+    querSnapShot.forEach(doc=>{
+        const data = doc.data();
+        messages[doc.id] = data;
+    })
 
     function initMap() {
         var opts = {
@@ -115,12 +76,293 @@ exports.line = functions.https.onRequest(async(request, response) => {
         } = event
 
         if(type=="follow"){
-                //新規でドキュメントID保存
-                firestore.doc("users/"+ userId).set({
-                    userId:userId,
-                    mailaddress:"",
-                    state:0
-                })
+
+            const res = await client.replyMessage(replyToken,messages.flex.test2)
+            console.log(messages.test.test)
+            // const replyMessage = {
+            //     type: "flex",
+            //     altText: "this is a flex message",
+            //     contents: {
+            //         "type": "carousel",
+            //         "contents": [
+            //           {
+            //             "type": "bubble",
+            //             "body": {
+            //               "type": "box",
+            //               "layout": "vertical",
+            //               "contents": [
+            //                 {
+            //                   "type": "image",
+            //                   "url": "https://scdn.line-apps.com/n/channel_devcenter/img/flexsnapshot/clip/clip1.jpg",
+            //                   "size": "full",
+            //                   "aspectMode": "cover",
+            //                   "aspectRatio": "2:3",
+            //                   "gravity": "top"
+            //                 },
+            //                 {
+            //                   "type": "box",
+            //                   "layout": "vertical",
+            //                   "contents": [
+            //                     {
+            //                       "type": "box",
+            //                       "layout": "vertical",
+            //                       "contents": [
+            //                         {
+            //                           "type": "text",
+            //                           "text": "Brown's T-shirts",
+            //                           "size": "xl",
+            //                           "color": "#ffffff",
+            //                           "weight": "bold"
+            //                         }
+            //                       ]
+            //                     },
+            //                     {
+            //                       "type": "box",
+            //                       "layout": "baseline",
+            //                       "contents": [
+            //                         {
+            //                           "type": "text",
+            //                           "text": "¥35,800",
+            //                           "color": "#ebebeb",
+            //                           "size": "sm",
+            //                           "flex": 0
+            //                         },
+            //                         {
+            //                           "type": "text",
+            //                           "text": "¥75,000",
+            //                           "color": "#ffffffcc",
+            //                           "decoration": "line-through",
+            //                           "gravity": "bottom",
+            //                           "flex": 0,
+            //                           "size": "sm"
+            //                         }
+            //                       ],
+            //                       "spacing": "lg"
+            //                     },
+            //                     {
+            //                       "type": "box",
+            //                       "layout": "vertical",
+            //                       "contents": [
+            //                         {
+            //                           "type": "filler"
+            //                         },
+            //                         {
+            //                           "type": "box",
+            //                           "layout": "baseline",
+            //                           "contents": [
+            //                             {
+            //                               "type": "filler"
+            //                             },
+            //                             {
+            //                               "type": "icon",
+            //                               "url": "https://scdn.line-apps.com/n/channel_devcenter/img/flexsnapshot/clip/clip14.png"
+            //                             },
+            //                             {
+            //                               "type": "text",
+            //                               "text": "Add to cart",
+            //                               "color": "#ffffff",
+            //                               "flex": 0,
+            //                               "offsetTop": "-2px"
+            //                             },
+            //                             {
+            //                               "type": "filler"
+            //                             }
+            //                           ],
+            //                           "spacing": "sm"
+            //                         },
+            //                         {
+            //                           "type": "filler"
+            //                         }
+            //                       ],
+            //                       "borderWidth": "1px",
+            //                       "cornerRadius": "4px",
+            //                       "spacing": "sm",
+            //                       "borderColor": "#ffffff",
+            //                       "margin": "xxl",
+            //                       "height": "40px"
+            //                     }
+            //                   ],
+            //                   "position": "absolute",
+            //                   "offsetBottom": "0px",
+            //                   "offsetStart": "0px",
+            //                   "offsetEnd": "0px",
+            //                   "backgroundColor": "#03303Acc",
+            //                   "paddingAll": "20px",
+            //                   "paddingTop": "18px"
+            //                 },
+            //                 {
+            //                   "type": "box",
+            //                   "layout": "vertical",
+            //                   "contents": [
+            //                     {
+            //                       "type": "text",
+            //                       "text": "SALE",
+            //                       "color": "#ffffff",
+            //                       "align": "center",
+            //                       "size": "xs",
+            //                       "offsetTop": "3px"
+            //                     }
+            //                   ],
+            //                   "position": "absolute",
+            //                   "cornerRadius": "20px",
+            //                   "offsetTop": "18px",
+            //                   "backgroundColor": "#ff334b",
+            //                   "offsetStart": "18px",
+            //                   "height": "25px",
+            //                   "width": "53px"
+            //                 }
+            //               ],
+            //               "paddingAll": "0px"
+            //             }
+            //           },
+            //           {
+            //             "type": "bubble",
+            //             "body": {
+            //               "type": "box",
+            //               "layout": "vertical",
+            //               "contents": [
+            //                 {
+            //                   "type": "image",
+            //                   "url": "https://scdn.line-apps.com/n/channel_devcenter/img/flexsnapshot/clip/clip2.jpg",
+            //                   "size": "full",
+            //                   "aspectMode": "cover",
+            //                   "aspectRatio": "2:3",
+            //                   "gravity": "top"
+            //                 },
+            //                 {
+            //                   "type": "box",
+            //                   "layout": "vertical",
+            //                   "contents": [
+            //                     {
+            //                       "type": "box",
+            //                       "layout": "vertical",
+            //                       "contents": [
+            //                         {
+            //                           "type": "text",
+            //                           "text": "Cony's T-shirts",
+            //                           "size": "xl",
+            //                           "color": "#ffffff",
+            //                           "weight": "bold"
+            //                         }
+            //                       ]
+            //                     },
+            //                     {
+            //                       "type": "box",
+            //                       "layout": "baseline",
+            //                       "contents": [
+            //                         {
+            //                           "type": "text",
+            //                           "text": "¥35,800",
+            //                           "color": "#ebebeb",
+            //                           "size": "sm",
+            //                           "flex": 0
+            //                         },
+            //                         {
+            //                           "type": "text",
+            //                           "text": "¥75,000",
+            //                           "color": "#ffffffcc",
+            //                           "decoration": "line-through",
+            //                           "gravity": "bottom",
+            //                           "flex": 0,
+            //                           "size": "sm"
+            //                         }
+            //                       ],
+            //                       "spacing": "lg"
+            //                     },
+            //                     {
+            //                       "type": "box",
+            //                       "layout": "vertical",
+            //                       "contents": [
+            //                         {
+            //                           "type": "filler"
+            //                         },
+            //                         {
+            //                           "type": "box",
+            //                           "layout": "baseline",
+            //                           "contents": [
+            //                             {
+            //                               "type": "filler"
+            //                             },
+            //                             {
+            //                               "type": "icon",
+            //                               "url": "https://scdn.line-apps.com/n/channel_devcenter/img/flexsnapshot/clip/clip14.png"
+            //                             },
+            //                             {
+            //                               "type": "text",
+            //                               "text": "Add to cart",
+            //                               "color": "#ffffff",
+            //                               "flex": 0,
+            //                               "offsetTop": "-2px"
+            //                             },
+            //                             {
+            //                               "type": "filler"
+            //                             }
+            //                           ],
+            //                           "spacing": "sm"
+            //                         },
+            //                         {
+            //                           "type": "filler"
+            //                         }
+            //                       ],
+            //                       "borderWidth": "1px",
+            //                       "cornerRadius": "4px",
+            //                       "spacing": "sm",
+            //                       "borderColor": "#ffffff",
+            //                       "margin": "xxl",
+            //                       "height": "40px"
+            //                     }
+            //                   ],
+            //                   "position": "absolute",
+            //                   "offsetBottom": "0px",
+            //                   "offsetStart": "0px",
+            //                   "offsetEnd": "0px",
+            //                   "backgroundColor": "#9C8E7Ecc",
+            //                   "paddingAll": "20px",
+            //                   "paddingTop": "18px"
+            //                 },
+            //                 {
+            //                   "type": "box",
+            //                   "layout": "vertical",
+            //                   "contents": [
+            //                     {
+            //                       "type": "text",
+            //                       "text": "SALE",
+            //                       "color": "#ffffff",
+            //                       "align": "center",
+            //                       "size": "xs",
+            //                       "offsetTop": "3px"
+            //                     }
+            //                   ],
+            //                   "position": "absolute",
+            //                   "cornerRadius": "20px",
+            //                   "offsetTop": "18px",
+            //                   "backgroundColor": "#ff334b",
+            //                   "offsetStart": "18px",
+            //                   "height": "25px",
+            //                   "width": "53px"
+            //                 }
+            //               ],
+            //               "paddingAll": "0px"
+            //             }
+            //           }
+            //         ]
+            //       }
+            //}
+            console.log(replyMessage)
+            client.replyMessage(replyToken,replyMessage)
+            .then(res=>{
+                console.log(res)
+                response.status(200).send('OK');
+            }).catch(err=>{
+                console.log(err)
+                response.status(400).send('Error');
+            })
+            //新規でドキュメントID保存
+            firestore.doc("users/"+ userId).set({
+                userId:userId,
+                mailaddress:"",
+                state:0
+            })
 
         }else if(type=="message"){
             if(message.type=="text"){//テキスト
